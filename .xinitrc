@@ -2,8 +2,8 @@
 
 userresources=$HOME/.Xresources
 usermodmap=$HOME/.Xmodmap
-sysresources=/etc/X11/xinit/.Xresources
-sysmodmap=/etc/X11/xinit/.Xmodmap
+sysresources=/etc/X11/xinit/Xresources
+sysmodmap=/etc/X11/xinit/Xmodmap
 
 # merge in defaults and keymaps
 
@@ -41,31 +41,30 @@ fi
 
 # start some nice programs
 
+if [ -n "`/etc/X11/chooser.sh`" ]; then
+ command="`/etc/X11/chooser.sh`"
+else
+ failsafe="yes"
+fi
+
 if [ -d /etc/X11/xinit/xinitrc.d ] ; then
- for f in /etc/X11/xinit/xinitrc.d/?*.sh ; do
+ for f in /etc/X11/xinit/xinitrc.d/?* ; do
   [ -x "$f" ] && . "$f"
  done
  unset f
 fi
-export LANGUAGE=zh_CN:en_US &
-export GTK_IM_MODULT=ibus
-export QT_IM_MODULE=ibus
+
+if [ -n "$failsafe" ]; then
 export XMODIFIERS=@im=ibus
-while xsetroot -name "Battery:$(acpi -b | awk '{print $4}' | cut -d"," -f1)|Volume:$(amixer get Master | awk -F'[][]' 'END{ print $4":"$2  }'    )|$(LC_ALL='C' date +'%F[%b %a] %R')"
-do
-    sleep 1
-done &
-ibus-daemon -drx &
+export GTK_IM_MODULE=ibus
+export QT_IM_MODULE=ibus
+ibus-daemon -drx
+slstatus &
 picom -CGb &
-export _JAVA_AWT_WM_NONREPARENTING=1
-exec $1
-wmname LG3D
-while habak -ms -hi ~/.config/desktop/wallpaper/
-do
-    sleep 600
-done &
-qv2ray &
 nm-applet &
+./.config/scripts/trayer.sh &
+#qv2ray &
+habak -ms ~/Desktop/aa.jpg &
 xfce4-power-manager &
 exec dwm
 else
